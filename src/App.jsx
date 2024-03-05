@@ -1,11 +1,12 @@
+import { Register } from "./pages/Register";
+import "./style.scss"
 
 function App() {
-
   return (
     <>
-    <h1>hello world</h1>
+      <Register />
     </>
   )
 }
 
-export default App
+export default App;
