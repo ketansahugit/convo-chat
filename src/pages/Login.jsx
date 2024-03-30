@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { signInWithEmailAndPassword} from "firebase/auth";
+import { auth } from "../firebase";
 
 export const Login = () => {
   const [err, setErr] = useState(false);
@@ -6,37 +9,12 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const displayName = e.target[0].value;
-    const email = e.target[1].value;
-    const password = e.target[2].value;
-    const file = e.target[3].files[0];
+    const email = e.target[0].value;
+    const password = e.target[1].value;
 
     try {
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      const storageRef = ref(storage, displayName);
-      const uploadTask = uploadBytesResumable(storageRef, file);
-
-      uploadTask.on(
-        (error) => {
-          setErr(true);
-        }, 
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then( async (downloadURL) => {
-            await updateProfile(res.user, {
-              displayName,
-              photoURL: downloadURL,
-            });
-            await setDoc(doc(db, "users", res.user.uid), {
-              uid: res.user.uid,
-              displayName,
-              email,
-              photoURL: downloadURL,
-            });
-            await setDoc(doc(db, "userChats", res.user.uid), {});
-            navigate("/");
-          });
-        }
-      );
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/")
     } catch(error) {
       setErr(true)
     }
@@ -47,12 +25,13 @@ export const Login = () => {
         <div className="formWrapper">
             <span className="logo">Convo</span>
             <span className="title">Login</span>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <input type="email" placeholder='email' />
                 <input type="password" placeholder='password' />
                 <button>Sign in</button>
+                {err && <span>Something went wrong</span>}
             </form>
-            <p>You don't have an account? Register</p>
+            <p>You don't have an account? <Link to="/register">Register</Link></p>
         </div>
     </div>
   )
